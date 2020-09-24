@@ -3,11 +3,11 @@ project(custom_ops)
 
 find_package(Torch REQUIRED)
 
-set(PredictorSRCFiles "image_classification.cpp";)
+set(PredictorSRCFiles "image_classification.cc";)
 
 foreach(src_file ${PredictorSRCFiles})
   message("======> ${src_file} will be compiled.")
-  string(REPLACE ".cpp" "_exe" exe_name ${src_file})
+  string(REPLACE ".cc" "_exe" exe_name ${src_file})
   add_executable(${exe_name} ${src_file})
   target_link_libraries(${exe_name} "${TORCH_LIBRARIES}")
   set_property(TARGET ${exe_name} PROPERTY CXX_STANDARD 14)

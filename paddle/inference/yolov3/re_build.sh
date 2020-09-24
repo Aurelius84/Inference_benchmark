@@ -23,5 +23,4 @@ cmake .. -DPADDLE_LIB=${LIB_DIR} \
 make -j4
 cp image_classification ../
 cp yolov3 ../
-cp ptb_lm ../
-cp seq2seq ../
+

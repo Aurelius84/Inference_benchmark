@@ -8,7 +8,7 @@
 #include <cstring>
 #include "paddle/include/paddle_inference_api.h"
 
-DEFINE_string(dirname, "../mobilenetv1", "Directory of the inference model.");
+DEFINE_string(dirname, "../yolov3", "Directory of the inference model.");
 DEFINE_bool(use_gpu, true, "whether use gpu");
 DEFINE_bool(use_mkldnn, true, "whether use mkldnn");
 DEFINE_int32(batch_size, 1, "batch size of inference model");

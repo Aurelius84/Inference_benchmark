@@ -6,5 +6,4 @@
  cmake ..
  make
 
- mv image_classification ../
- mv yolov3 ../
+ mv image_classification_exe ../

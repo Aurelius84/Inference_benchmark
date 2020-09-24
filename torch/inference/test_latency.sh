@@ -1,10 +1,11 @@
 #!/bin/bash
 
-dirname=$1
+model_type=$1
+dirname=$2
 
 for i in {1..5}
 do 
   echo "start run iter : $i ..."
-  ./image_classification_exe $dirname &
+  ./${model_type}_exe $dirname &
   wait
 done

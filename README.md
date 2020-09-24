@@ -50,10 +50,17 @@
 |                 |  32  |   32.91 |     32.95   |    -  | - |
 
 
+| 模型(单位：ms)  |  bs  | paddle（静） | paddle（动转静） | paddle(+break优化) |  TF  |
+| :-------------: | :--: | :----------: | :----------: | :---: | :--: |
+| **Seq2seq**     |  1   |  179.11   |     337.66    |   130.73   | -|
+|                 |  4   |   188.78  |     349.98    |   143.98   | - |
+|                 |  16  |   238.50  |     400.70    |   207.72   | -|
+|                 |  32  |   327.72  |     494.46    |    295.61  | - |
+
 
 ### 一、环境准备  && 测试
 
-#### 1. Paddle
+#### 1. Paddle环境搭建
 Paddle官方发布了cuda10的docker镜像，首先拉取images:
 ```bash
 docker images pull hub.baidubce.com/paddlepaddle/paddle:latest-gpu-cuda10.1-cudnn7
@@ -113,7 +120,7 @@ apt-get update & apt install libprotobuf-dev
 # 其中 16为batch_size, 后面为模型路径，可根据自己实际目录修改
 ```
 
-#### 2. Torch
+#### 2. Torch环境搭建
 
 Torch官方也提供了cuda10的镜像，首先拉取images:
 ```bash
@@ -152,7 +159,7 @@ inference目录下有一个`image_classification.cpp`，是resnet50/mobileNetv1�
 # 注意 torch的.pt模型需要用1.6.0版本的torch保存，路径可根据自己实际目录修改
 ```
 
-### 3. Tensorflow
+### 3. Tensorflow环境搭建
 
 Tensorflow并没有像Pytorch那样提供官方编译好的C++预测lib，需要依赖bazel进行编译，但由于环境复杂，编译流程较长，极容易踩坑。因此我们采用了开源的docker镜像。
 
@@ -177,9 +184,9 @@ python image_classification.py # 保存模型
 ### 二、添加新模型测试流程
 
 #### 1. 模型准备
-测试paddle和竞品torch、tf的动转静预测性能，首先需要保存 **动转静** 后的模型。
+测试paddle和竞品torch、tf的动转静预测性能，首先需要保存 **动转静** 后的模型。详细的模型导出教程参考各目录下readme.
 
-paddle可以通过`@to_static`装饰`forward`函数，然后调用`jit.save`保存。
+整体流程上，paddle可以通过`@to_static`装饰`forward`函数，然后调用`jit.save`保存。
 ```python
 import paddle
 import paddle.fluid as fluid
@@ -194,7 +201,7 @@ def save_paddle_resnet(model, model_name):
         else:
             net = model(class_dim=1000)
         net.forward = to_static(net.forward, [InputSpec([None, 3, 224, 224], name='img')])
-        config = paddle.jit.SaveLoadConfig()
+        config = paddle.SaveLoadConfig()
         config.model_filename = 'model'
         config.params_filename = 'params'
         paddle.jit.save(net, model_path=paddle_model_dir + model_name, configs=config)
@@ -220,7 +227,7 @@ paddle和torch的模型实现，见仓库：https://github.com/phlrain/example
 tensorflow的可以将keras的模型保存为一个单独的`.pb`文件，以供C++端直接加载，详细步骤请参考：[教程](https://blog.csdn.net/ouening/article/details/104335552)
 
 #### 2. 预测接口开发
-paddle的预测接口开发，可以参考`paddle/inference/image_classification.cc`中的代码。
+paddle的预测接口开发，可以参考`paddle/inference/image_classification/image_classification.cc`中的代码。
 
 可以直接copy一份，修改一下输入的数据shape即可，即修改如下代码行：
 ```cpp

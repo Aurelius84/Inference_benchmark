@@ -94,7 +94,7 @@ def save_mobilenet(model, model_name):
         net.forward = to_static(net.forward, [InputSpec([None, 3, 224, 224], name='img')])
 
         # Save configuration
-        config = paddle.jit.SaveLoadConfig()
+        config = paddle.SaveLoadConfig()
         config.model_filename = 'model'
         config.params_filename = 'params'
         paddle.jit.save(net, model_path=root_dir + model_name, configs=config)

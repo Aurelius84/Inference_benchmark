@@ -94,7 +94,7 @@ def save_inference_model():
     # bind `beam_search` into `forward`
     model.forward = to_static(model.beam_search, input_spec=[ids_spec, seq_len_spec])
     # save configuration
-    config = paddle.jit.SaveLoadConfig()
+    config = paddle.SaveLoadConfig()
     config.model_filename = 'model'
     config.params_filename = 'params'
     paddle.jit.save(model, model_path=paddle_model_dir + 'seq2seq_%s'%batch_size,input_spec=[ids_spec, seq_len_spec], configs=config)

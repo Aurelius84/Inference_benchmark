@@ -67,6 +67,7 @@ seq2seq动态模型在 [models/dygraph/seq2seq/base_model.py](https://github.com
 import paddle
 from paddle.static import InputSpec
 from paddle.jit import to_static
+from seq2seq_dygraph_model import BaseModel
 # paddle.jit.set_verbosity(10)
 
 def save_inference_model():
@@ -92,16 +93,15 @@ def save_inference_model():
     
     # bind `beam_search` into `forward`
     model.forward = to_static(model.beam_search, input_spec=[ids_spec, seq_len_spec])
-
-    # ids = paddle.to_tensor(np.random.randint(5000, size=(2, 20)).astype('int64'))
-    # seq_len = paddle.to_tensor(np.array([13, 20]).astype('int64'))
-    # out = model.beam_search(ids, seq_len)
-    # print(out.shape)
-
+    # save configuration
     config = paddle.jit.SaveLoadConfig()
     config.model_filename = 'model'
     config.params_filename = 'params'
     paddle.jit.save(model, model_path=paddle_model_dir + 'seq2seq_%s'%batch_size,input_spec=[ids_spec, seq_len_spec], configs=config)
+
+
+if __name__ == '__main__':
+    save_inference_model()
 ```
 
 

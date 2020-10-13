@@ -40,7 +40,7 @@ def get_data(df, batch_size):
 
 def train_keras_model_by_fit(defun=False):
     # warm up by first batch_size = 1
-    for batch_size in [1, 1, 4, 16, 32]:
+    for batch_size in [1, 1, 4, 16, 32, 64, 128]:
         df = FakeData(batch_size * 100)
 
         model = tf.keras.applications.resnet.ResNet50(
@@ -101,7 +101,7 @@ def train_eager_with_tf_function(defun=True):
         model.call = tf.function(model.call)
     optimizer = tf.compat.v1.train.AdamOptimizer(learning_rate=0.01)
 
-    for batch_size in [1, 1, 4, 16, 32]:
+    for batch_size in [1, 1, 4, 16, 32, 64, 128]:
 
         images, labels = random_batch(batch_size)
 

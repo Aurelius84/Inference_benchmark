@@ -283,7 +283,7 @@ def train():
         exe.run(start_prog)
         main_prog = fluid.CompiledProgram(main_prog)
 
-        for batch_size in [1, 1, 4, 16, 32]:
+        for batch_size in [1, 1, 4, 16, 32, 64, 128]:
             # dataloader
             # loader = fluid.io.DataLoader.from_generator(feed_list=[img, label], capacity=16, iterable=True)
             # loader.set_batch_generator(batch_generator_creator(batch_size), places=fluid.cuda_places())
@@ -294,7 +294,7 @@ def train():
                 # pred_out = exe.run(main_prog, feed=data, fetch_list=[pred])
             start = time.time()
             for i in range(100):
-                pred_out = exe.run(main_prog, feed={'img': x, 'label':gt_label}, fetch_list=[pred])
+                pred_out = exe.run(main_prog, feed={'img': x, 'label':gt_label}, fetch_list=[pred], use_program_cache=True)
             end = time.time()
             print("batch_size: {}, cost: {} ms.".format(batch_size, (end - start)*10))
 

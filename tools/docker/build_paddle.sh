@@ -8,6 +8,16 @@ then
     apt-get update & apt install libprotobuf-dev
     wait
 
+    # set env variables for build
+    echo "export WITH_MKL=ON" >> ~/.bash_profile
+    echo "export WITH_GPU=ON" >> ~/.bash_profile
+    echo "USET_TENSORRT=OFF" >> ~/.bash_profile
+
+    echo "CUDA_LIB_DIR='/usr/local/cuda-10.1/lib64/'" >> ~/.bash_profile
+    echo "CUDNN_LIB_DIR='/usr/lib/x86_64-linux-gnu/'" >> ~/.bash_profile
+    # please modify LIB_DIR for your built inference lib dir
+    echo "LIB_DIR='$build_dir/fluid_inference_install_dir'" >> ~/.bash_profile
+
     # attach container and prepare code
     cd /workspace
 

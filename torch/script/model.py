@@ -1,5 +1,6 @@
 import torch
 
+
 class MyModule(torch.nn.Module):
     def __init__(self, N, M):
         super(MyModule, self).__init__()
@@ -7,10 +8,11 @@ class MyModule(torch.nn.Module):
 
     def forward(self, input):
         if input.sum() > 0:
-          output = self.weight.mv(input)
+            output = self.weight.mv(input)
         else:
-          output = self.weight + input
+            output = self.weight + input
         return output
+
 
 my_module = MyModule(10, 20)
 sm = torch.jit.script(my_module)

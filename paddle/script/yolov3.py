@@ -19,6 +19,7 @@ import os
 os.environ["CUDA_VISIBLE_DEVICES"] = "4"
 
 import paddle
+
 import paddle.fluid as fluid
 from paddle.fluid.param_attr import ParamAttr
 from paddle.fluid.regularizer import L2Decay
@@ -30,13 +31,15 @@ from darknet import conv_bn_layer
 
 np.random.seed(2020)
 
+
 class Config(object):
     input_size = 224
     class_num = 80
     max_box_num = 50
     anchor_masks = [[6, 7, 8], [3, 4, 5], [0, 1, 2]]
     anchors = [
-    10, 13, 16, 30, 33, 23, 30, 61, 62, 45, 59, 119, 116, 90, 156, 198, 373, 326
+        10, 13, 16, 30, 33, 23, 30, 61, 62, 45, 59, 119, 116, 90, 156, 198,
+        373, 326
     ]
     ignore_thresh = .7
     valid_thresh = 0.005
@@ -45,8 +48,8 @@ class Config(object):
     nms_posk = 100
     nms_thresh = 0.45
 
-cfg = Config()
 
+cfg = Config()
 
 
 def yolo_detection_block(input, channel, is_test=True, name=None):
@@ -117,7 +120,7 @@ class YOLOv3(object):
         #             fluid.layers.read_file(self.py_reader)
         # else:
         self.image = fluid.data(
-            name='image', shape=[-1]+self.image_shape, dtype='float32')
+            name='image', shape=[-1] + self.image_shape, dtype='float32')
         self.gtbox = fluid.data(
             name="gtbox", shape=[-1, cfg.max_box_num, 4], dtype='float32')
         self.gtlabel = fluid.data(
@@ -246,11 +249,11 @@ def train(use_program_cache):
         model.build_model()
         input_size = cfg.input_size
         loss = model.loss()
-    
+
         # optimizer
         optimizer = fluid.optimizer.Momentum(learning_rate=0.01, momentum=0.99)
         optimizer.minimize(loss)
-        
+
         # run program
         exe = fluid.Executor(fluid.CUDAPlace(0))
         exe.run(start_prog)
@@ -261,17 +264,31 @@ def train(use_program_cache):
             # loader = fluid.io.DataLoader.from_generator(feed_list=[img, label], capacity=16, iterable=True)
             # loader.set_batch_generator(batch_generator_creator(batch_size), places=fluid.cuda_places())
 
-            image = np.random.uniform(size=[batch_size, 3, input_size, input_size]).astype('float32')
-            gtbox = np.random.uniform(size=[batch_size, cfg.max_box_num, 4]).astype('float32')
-            gtlabel = np.random.randint(1, cfg.class_num, [batch_size, cfg.max_box_num]).astype('int32')
-            gtscore = np.random.uniform(size=[batch_size, cfg.max_box_num]).astype('float32')
+            image = np.random.uniform(
+                size=[batch_size, 3, input_size, input_size]).astype('float32')
+            gtbox = np.random.uniform(
+                size=[batch_size, cfg.max_box_num, 4]).astype('float32')
+            gtlabel = np.random.randint(
+                1, cfg.class_num,
+                [batch_size, cfg.max_box_num]).astype('int32')
+            gtscore = np.random.uniform(
+                size=[batch_size, cfg.max_box_num]).astype('float32')
             # for data in loader():
-                # pred_out = exe.run(main_prog, feed=data, fetch_list=[pred])
+            # pred_out = exe.run(main_prog, feed=data, fetch_list=[pred])
             start = time.time()
             for i in range(100):
-                pred_out = exe.run(main_prog, feed={'image': image, 'gtbox':gtbox, 'gtlabel':gtlabel, 'gtscore': gtscore}, fetch_list=[loss], use_program_cache=use_program_cache)
+                pred_out = exe.run(main_prog,
+                                   feed={
+                                       'image': image,
+                                       'gtbox': gtbox,
+                                       'gtlabel': gtlabel,
+                                       'gtscore': gtscore
+                                   },
+                                   fetch_list=[loss],
+                                   use_program_cache=use_program_cache)
             end = time.time()
-            print("batch_size: {}, cost: {} ms.".format(batch_size, (end - start)*10))
+            print("batch_size: {}, cost: {} ms.".format(batch_size, (
+                end - start) * 10))
 
 
 if __name__ == '__main__':

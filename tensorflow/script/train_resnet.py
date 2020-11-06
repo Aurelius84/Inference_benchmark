@@ -1,4 +1,3 @@
-
 import tensorflow as tf
 import numpy as np
 import time
@@ -28,6 +27,7 @@ class FakeData(object):
     def output_types(self):
         return (tf.float32, tf.int32)
 
+
 def get_data(df, batch_size):
     tdf = tf.data.Dataset.from_generator(
         generator=df.__iter__,
@@ -44,9 +44,7 @@ def train_keras_model_by_fit(defun=False):
         df = FakeData(batch_size * 100)
 
         model = tf.keras.applications.resnet.ResNet50(
-            input_shape=df.output_shapes()[0],
-            include_top=True,
-            weights=None)
+            input_shape=df.output_shapes()[0], include_top=True, weights=None)
 
         model.compile(
             optimizer=tf.keras.optimizers.Adam(lr=0.001),
@@ -60,7 +58,8 @@ def train_keras_model_by_fit(defun=False):
         model.fit(get_data(df, batch_size), epochs=1)
         # model.call(get_data(df, batch_size))
         end = time.time()
-        print("batch_size: {}, cost: {} ms.".format(batch_size, (end - start)*10))
+        print("batch_size: {}, cost: {} ms.".format(batch_size, (end - start) *
+                                                    10))
 
 
 def compute_gradients(model, images, labels, num_replicas=1):
@@ -82,7 +81,7 @@ def apply_gradients(model, optimizer, gradients):
 
 def random_batch(batch_size, data_format='channels_first'):
     shape = (3, 224, 224) if data_format == 'channels_first' else (224, 224, 3)
-    shape = (batch_size,) + shape
+    shape = (batch_size, ) + shape
 
     num_classes = 1000
     images = tf.random.uniform(shape)
@@ -106,17 +105,17 @@ def train_eager_with_tf_function(defun=True):
         images, labels = random_batch(batch_size)
 
         for i in range(105):
-            if i==5:
+            if i == 5:
                 start = time.time()
-            apply_gradients(model, optimizer, compute_gradients(model, images, labels))
-        
+            apply_gradients(model, optimizer,
+                            compute_gradients(model, images, labels))
+
         end = time.time()
-        print("batch_size: {}, cost: {} ms.".format(batch_size, (end - start)*10))
+        print("batch_size: {}, cost: {} ms.".format(batch_size, (end - start) *
+                                                    10))
 
 
 if __name__ == '__main__':
     defun = True
     # train_keras_model_by_fit(defun)
     train_eager_with_tf_function(defun)
-
-

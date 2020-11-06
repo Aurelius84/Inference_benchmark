@@ -19,6 +19,7 @@ from __future__ import print_function
 import math
 
 import os
+
 os.environ["CUDA_VISIBLE_DEVICES"] = "4"
 import numpy as np
 import time
@@ -85,7 +86,10 @@ class ResNet():
                         data_format=data_format)
 
             pool = fluid.layers.pool2d(
-                input=conv, pool_type='avg', global_pooling=True, data_format=data_format)
+                input=conv,
+                pool_type='avg',
+                global_pooling=True,
+                data_format=data_format)
             stdv = 1.0 / math.sqrt(pool.shape[1] * 1.0)
             out = fluid.layers.fc(
                 input=pool,
@@ -105,7 +109,10 @@ class ResNet():
                         data_format=data_format)
 
             pool = fluid.layers.pool2d(
-                input=conv, pool_type='avg', global_pooling=True, data_format=data_format)
+                input=conv,
+                pool_type='avg',
+                global_pooling=True,
+                data_format=data_format)
             stdv = 1.0 / math.sqrt(pool.shape[1] * 1.0)
             out = fluid.layers.fc(
                 input=pool,
@@ -156,7 +163,8 @@ class ResNet():
         else:
             ch_in = input.shape[-1]
         if ch_in != ch_out or stride != 1 or is_first == True:
-            return self.conv_bn_layer(input, ch_out, 1, stride, name=name, data_format=data_format)
+            return self.conv_bn_layer(
+                input, ch_out, 1, stride, name=name, data_format=data_format)
         else:
             return input
 
@@ -195,7 +203,8 @@ class ResNet():
         return fluid.layers.elementwise_add(
             x=short, y=conv2, act='relu', name=name + ".add.output.5")
 
-    def basic_block(self, input, num_filters, stride, is_first, name, data_format):
+    def basic_block(self, input, num_filters, stride, is_first, name,
+                    data_format):
         conv0 = self.conv_bn_layer(
             input=input,
             num_filters=num_filters,
@@ -212,7 +221,12 @@ class ResNet():
             name=name + "_branch2b",
             data_format=data_format)
         short = self.shortcut(
-            input, num_filters, stride, is_first, name=name + "_branch1", data_format=data_format)
+            input,
+            num_filters,
+            stride,
+            is_first,
+            name=name + "_branch1",
+            data_format=data_format)
         return fluid.layers.elementwise_add(x=short, y=conv1, act='relu')
 
 
@@ -249,13 +263,13 @@ def get_random_images_and_labels(batch_size):
 
 def batch_generator_creator(batch_size):
     BATCH_NUM = 100
+
     def __reader__():
         for _ in range(BATCH_NUM):
             batch_image, batch_label = get_random_images_and_labels(batch_size)
             yield batch_image, batch_label
 
     return __reader__
-
 
 
 def train():
@@ -267,17 +281,17 @@ def train():
     with fluid.program_guard(main_prog, start_prog):
         # placeholder
         img = fluid.data(shape=[None, 3, 224, 224], name='img')
-        label = fluid.data(shape=[None, 1],dtype='int64', name='label')
+        label = fluid.data(shape=[None, 1], dtype='int64', name='label')
         # build model
         model = ResNet50()
-        out = model.net(img, class_dim=1000) # align with dygraph
+        out = model.net(img, class_dim=1000)  # align with dygraph
         pred = fluid.layers.softmax(out)
         # optimizer
         optimizer = fluid.optimizer.Adam(learning_rate=0.01)
         cost = fluid.layers.cross_entropy(input=pred, label=label)
         loss = fluid.layers.mean(cost)
         optimizer.minimize(loss)
-        
+
         # run program
         exe = fluid.Executor(fluid.CUDAPlace(0))
         exe.run(start_prog)
@@ -289,14 +303,21 @@ def train():
             # loader.set_batch_generator(batch_generator_creator(batch_size), places=fluid.cuda_places())
 
             x = np.random.randn(batch_size, 3, 224, 224).astype('float32')
-            gt_label = np.random.randint(0, 1000, [batch_size, 1]).astype('int64')
+            gt_label = np.random.randint(0, 1000,
+                                         [batch_size, 1]).astype('int64')
             # for data in loader():
-                # pred_out = exe.run(main_prog, feed=data, fetch_list=[pred])
+            # pred_out = exe.run(main_prog, feed=data, fetch_list=[pred])
             start = time.time()
             for i in range(100):
-                pred_out = exe.run(main_prog, feed={'img': x, 'label':gt_label}, fetch_list=[pred], use_program_cache=True)
+                pred_out = exe.run(main_prog,
+                                   feed={'img': x,
+                                         'label': gt_label},
+                                   fetch_list=[pred],
+                                   use_program_cache=True)
             end = time.time()
-            print("batch_size: {}, cost: {} ms.".format(batch_size, (end - start)*10))
+            print("batch_size: {}, cost: {} ms.".format(batch_size, (
+                end - start) * 10))
+
 
 if __name__ == '__main__':
     train()

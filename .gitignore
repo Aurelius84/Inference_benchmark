@@ -40,3 +40,4 @@ libtorch*
 *.pt
 *.pb
 *_exe
+logs

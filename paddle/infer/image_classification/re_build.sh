@@ -1,13 +1,14 @@
 #!/bin/bash
+
 WITH_MKL=ON
-WITH_GPU=ON
+export WITH_GPU=ON
 USET_TENSORRT=OFF
 
 CUDA_LIB_DIR='/usr/local/cuda-10.1/lib64/'
 CUDNN_LIB_DIR='/usr/lib/x86_64-linux-gnu/'
 # please modify LIB_DIR for your built inference lib dir
-LIB_DIR='/workspace/code_dev/paddle-fork/build_infer_10/fluid_inference_install_dir'
-
+# TODO: Need discuss with QA to determine how to config this env vaiable
+LIB_DIR='/workspace/code_dev/paddle-fork/build_infer_10/paddle_inference_install_dir'
 
 mkdir -p build
 cd build
@@ -22,4 +23,4 @@ cmake .. -DPADDLE_LIB=${LIB_DIR} \
   -DCUDNN_LIB=${CUDNN_LIB_DIR}
 
 make -j4
-cp image_classification_exe ../
+mv image_classification_exe ../

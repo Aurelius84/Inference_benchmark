@@ -17,16 +17,13 @@ from __future__ import division
 from __future__ import print_function
 
 import math
-
-import os
-
-os.environ["CUDA_VISIBLE_DEVICES"] = "4"
 import numpy as np
-import time
 
 import paddle
 import paddle.fluid as fluid
 from paddle.fluid.param_attr import ParamAttr
+
+from utils import get_model_path
 
 __all__ = [
     "ResNet", "ResNet18", "ResNet34", "ResNet50", "ResNet101", "ResNet152"
@@ -272,8 +269,10 @@ def batch_generator_creator(batch_size):
     return __reader__
 
 
-def train():
-
+def export_inference_model(model_name='resnet50', class_dim=1000):
+    """
+    Save inference model
+    """
     paddle.enable_static()
 
     main_prog = fluid.Program()
@@ -281,43 +280,32 @@ def train():
     with fluid.program_guard(main_prog, start_prog):
         # placeholder
         img = fluid.data(shape=[None, 3, 224, 224], name='img')
-        label = fluid.data(shape=[None, 1], dtype='int64', name='label')
         # build model
-        model = ResNet50()
-        out = model.net(img, class_dim=1000)  # align with dygraph
+        if model_name == 'resnet50':
+            model = ResNet50()
+        elif model_name == 'resnet101':
+            model = ResNet50()
+        else:
+            raise ValueError(
+                "Only support model_name is [resnet50, resnet101].")
+
+        out = model.net(img, class_dim=class_dim)  # align with dygraph
         pred = fluid.layers.softmax(out)
-        # optimizer
-        optimizer = fluid.optimizer.Adam(learning_rate=0.01)
-        cost = fluid.layers.cross_entropy(input=pred, label=label)
-        loss = fluid.layers.mean(cost)
-        optimizer.minimize(loss)
 
-        # run program
-        exe = fluid.Executor(fluid.CUDAPlace(0))
+        # save model
+        exe = fluid.Executor(fluid.CPUPlace())
         exe.run(start_prog)
-        main_prog = fluid.CompiledProgram(main_prog)
 
-        for batch_size in [1, 1, 4, 16, 32, 64, 128]:
-            # dataloader
-            # loader = fluid.io.DataLoader.from_generator(feed_list=[img, label], capacity=16, iterable=True)
-            # loader.set_batch_generator(batch_generator_creator(batch_size), places=fluid.cuda_places())
-
-            x = np.random.randn(batch_size, 3, 224, 224).astype('float32')
-            gt_label = np.random.randint(0, 1000,
-                                         [batch_size, 1]).astype('int64')
-            # for data in loader():
-            # pred_out = exe.run(main_prog, feed=data, fetch_list=[pred])
-            start = time.time()
-            for i in range(100):
-                pred_out = exe.run(main_prog,
-                                   feed={'img': x,
-                                         'label': gt_label},
-                                   fetch_list=[pred],
-                                   use_program_cache=True)
-            end = time.time()
-            print("batch_size: {}, cost: {} ms.".format(batch_size, (
-                end - start) * 10))
+        model_path = get_model_path(model_name)
+        fluid.io.save_inference_model(
+            dirname=model_path,
+            feeded_var_names=['img'],
+            target_vars=[pred],
+            executor=exe,
+            model_filename='model',
+            params_filename='params')
 
 
 if __name__ == '__main__':
-    train()
+    export_inference_model('resnet50', 1000)
+    export_inference_model('resnet101', 1000)

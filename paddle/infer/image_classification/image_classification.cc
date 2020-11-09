@@ -8,7 +8,7 @@
 #include <cstring>
 #include "paddle/include/paddle_inference_api.h"
 
-DEFINE_string(dirname, "../mobilenetv1", "Directory of the inference model.");
+DEFINE_string(dirname, "../resnet50", "Directory of the inference model.");
 DEFINE_bool(use_gpu, true, "whether use gpu");
 DEFINE_bool(use_mkldnn, true, "whether use mkldnn");
 DEFINE_int32(batch_size, 1, "batch size of inference model");
@@ -94,6 +94,6 @@ namespace paddle_infer{
 
 int main(int argc, char** argv){
     google::ParseCommandLineFlags(&argc, &argv, true);
-    paddle::test_predictor_latency();
+    paddle_infer::test_predictor_latency();
     return 0;
 }

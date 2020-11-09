@@ -18,6 +18,8 @@ then
     # please modify LIB_DIR for your built inference lib dir
     echo "LIB_DIR='$build_dir/fluid_inference_install_dir'" >> ~/.bash_profile
 
+    source ~/.bash_profile
+
     # attach container and prepare code
     cd /workspace
 

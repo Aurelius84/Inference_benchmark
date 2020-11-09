@@ -2,5 +2,14 @@
 
 current_dir=$(cd "$(dirname "$0")";pwd)
 
-# resnet50、resnet101
-python $current_dir/resnet.py
+model_files=(
+    "resnet" 
+    "mobilenet_v1"
+    )
+
+for model in ${model_files[@]}
+do
+  echo "saving $model ..."
+  python $current_dir/$model.py
+  wait
+done

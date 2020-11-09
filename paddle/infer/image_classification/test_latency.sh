@@ -2,7 +2,9 @@
 
 repeat_time=100
 current_dir=$(cd "$(dirname "$0")";pwd)
-model_dir= $current_dir/../../../models
+echo $current_dir
+model_dir=$(cd "$(dirname "$0")";cd ../../models;pwd)
+echo $model_dir
 
 # save logs
 mkdir -p $current_dir/logs
@@ -10,15 +12,16 @@ mkdir -p $current_dir/logs
 bash $current_dir/re_build.sh
 
 # test resnet
-for model_name in "resnet50" "resnet101" "mobilenet_v1"
+for model_name in "resnet50"
 do
     for model_type in "static" "dy2stat"
-    do
-        for device in "use_gpu" "nouse_gpu"
+    do   
+        # For now just test GPU latency(defalut gpu:0), speicific "nouse_gpu" while on CPU
+        for device in "use_gpu"
         do
             for batch_size in 1 4 16 32
             do
-                model_path=$model_dir/$model_name/$model_type
+                model_path=$model_dir/$model_type/$model_name
                 log_path=$current_dir/logs/resnet_${model_type}_${device}_$batch_size.txt
                 touch $log_path
                 # test latency

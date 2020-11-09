@@ -17,13 +17,13 @@ from __future__ import division
 from __future__ import print_function
 
 import math
-
-import os
 import numpy as np
 
 import paddle
 import paddle.fluid as fluid
 from paddle.fluid.param_attr import ParamAttr
+
+from utils import get_model_path
 
 __all__ = [
     "ResNet", "ResNet18", "ResNet34", "ResNet50", "ResNet101", "ResNet152"
@@ -280,7 +280,6 @@ def export_inference_model(model_name='resnet50', class_dim=1000):
     with fluid.program_guard(main_prog, start_prog):
         # placeholder
         img = fluid.data(shape=[None, 3, 224, 224], name='img')
-        label = fluid.data(shape=[None, 1], dtype='int64', name='label')
         # build model
         if model_name == 'resnet50':
             model = ResNet50()
@@ -292,11 +291,6 @@ def export_inference_model(model_name='resnet50', class_dim=1000):
 
         out = model.net(img, class_dim=class_dim)  # align with dygraph
         pred = fluid.layers.softmax(out)
-        # optimizer
-        optimizer = fluid.optimizer.Adam(learning_rate=0.01)
-        cost = fluid.layers.cross_entropy(input=pred, label=label)
-        loss = fluid.layers.mean(cost)
-        optimizer.minimize(loss)
 
         # save model
         exe = fluid.Executor(fluid.CPUPlace())
@@ -310,15 +304,6 @@ def export_inference_model(model_name='resnet50', class_dim=1000):
             executor=exe,
             model_filename='model',
             params_filename='params')
-
-
-def get_model_path(model_name):
-    """
-    Return the saved model dir name
-    """
-    infer_dir = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
-    model_path = os.path.join(infer_dir, "models/static/" + model_name)
-    return model_path
 
 
 if __name__ == '__main__':

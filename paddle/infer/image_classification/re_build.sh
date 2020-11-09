@@ -13,4 +13,4 @@ cmake .. -DPADDLE_LIB=${LIB_DIR} \
   -DCUDNN_LIB=${CUDNN_LIB_DIR}
 
 make -j4
-cp image_classification_exe ../
+mv image_classification_exe ../

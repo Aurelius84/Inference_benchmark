@@ -27,7 +27,7 @@ namespace paddle_infer{
     }
 
     void PrepareTRTConfig(Config *config){
-        config->SetModel(FLAGS_dirname + "/model", FLAGS_dirname + "/params");
+        config->SetModel(FLAGS_dirname + "/x.pdmodel", FLAGS_dirname + "/x.pdiparams");
         if(FLAGS_use_gpu){
             config->EnableUseGpu(1000, 0); // gpu:0
         }else{
@@ -36,7 +36,7 @@ namespace paddle_infer{
         }
         
         config->SwitchUseFeedFetchOps(false);
-        config->SwitchIrOptim(false);  // close all optimization
+        config->SwitchIrOptim(true);  // close all optimization
     }
 
 
@@ -55,7 +55,8 @@ namespace paddle_infer{
         int height = 224;
         int width = 224;
         int input_num = channels * height * width * batch_size;
-        float input[input_num] = {0};
+        float input[input_num];
+        memset(input, 0, input_num*sizeof(float) );
 
         // 4. feed data
         auto input_names = predictor->GetInputNames();

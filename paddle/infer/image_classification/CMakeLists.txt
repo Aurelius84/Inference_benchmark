@@ -47,14 +47,14 @@ link_directories("${PADDLE_LIB}/paddle/lib")
 
 
 if(WITH_MKL)
-    include_directories("${PADDLE_LIB}/third_party/install/mklml/lib")
+    include_directories("${PADDLE_LIB}/third_party/install/mklml/include")
     set(MATH_LIB ${PADDLE_LIB}/third_party/install/mklml/lib/libmklml_intel${CMAKE_SHARED_LIBRARY_SUFFIX} 
     ${PADDLE_LIB}/third_party/install/mklml/lib/libiomp5${CMAKE_SHARED_LIBRARY_SUFFIX})
-set(MKLDNN_PATH "{PADDLE_LIB}/third_party/install/mkldnn")
-if(EXISTS ${MKLDNN_PATH})
-    include_directories("${MKLDNN_PATH}/include")
-    set(MKLDNN_LIB ${MKLDNN_PATH}/lib/libmkldnn.so.0)
-endif()
+    set(MKLDNN_PATH "{PADDLE_LIB}/third_party/install/mkldnn")
+    if(EXISTS ${MKLDNN_PATH})
+        include_directories("${MKLDNN_PATH}/include")
+        set(MKLDNN_LIB ${MKLDNN_PATH}/lib/libmkldnn.so.0)
+    endif()
 else()
 set(MATH_LIB ${PADDLE_LIB}/third_party/install/openblas/lib/libopenblas${CMAKE_STATIC_LIBRARY_SUFFIX})
 endif()
@@ -67,7 +67,7 @@ endif()
 
 
 set(EXTERNAL_LIB "-lrt -ldl -lpthread")
-set(DEPS ${DEPS} ${MATH_LIB} ${MKLDNN_LIB} glog gflags protobuf xxhash ${EXTERNAL_LIB})
+set(DEPS ${DEPS} ${MATH_LIB} ${MKLDNN_LIB} glog gflags xxhash ${EXTERNAL_LIB})
 
 if(WITH_GPU)
     if(USE_TENSORRT)
@@ -75,7 +75,7 @@ if(WITH_GPU)
         set(DEPS ${DEPS} ${TENSORRT_ROOT}/lib/libnvinfer_plugin${CMAKE_SHARED_LIBRARY_SUFFIX})
     endif()
     set(DEPS ${DEPS} ${CUDA_LIB}/libcudart${CMAKE_SHARED_LIBRARY_SUFFIX})
-    set(DEPS ${DEPS} ${CUDNN_LIB}/libcublas${CMAKE_SHARED_LIBRARY_SUFFIX})
+    set(DEPS ${DEPS} ${CUDA_LIB}/libcublas${CMAKE_SHARED_LIBRARY_SUFFIX})
     set(DEPS ${DEPS} ${CUDNN_LIB}/libcudnn${CMAKE_SHARED_LIBRARY_SUFFIX})
 endif()
 
